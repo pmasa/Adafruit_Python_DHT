@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Gauge Test</title>
+    <script src="static/gauge.min.js"></script>
+</head>
+<body>
+
+<button onclick="animateGauges()">Animate</button>
+<button onclick="stopGaugesAnimation()">Stop animation</button>
+
+<hr>
+<script>
+  am4core.ready(function() {
+  
+  // Themes begin
+  am4core.useTheme(am4themes_animated);
+  // Themes end
+  
+  // create chart
+  var chart = am4core.create("chartdiv", am4charts.GaugeChart);
+  chart.innerRadius = am4core.percent(82);
+  
+  /**
+   * Normal axis
+   */
+  
+  var axis = chart.xAxes.push(new am4charts.ValueAxis());
+  axis.min = 0;
+  axis.max = 100;
+  axis.strictMinMax = true;
+  axis.renderer.radius = am4core.percent(80);
+  axis.renderer.inside = true;
+  axis.renderer.line.strokeOpacity = 1;
+  axis.renderer.ticks.template.disabled = false
+  axis.renderer.ticks.template.strokeOpacity = 1;
+  axis.renderer.ticks.template.length = 10;
+  axis.renderer.grid.template.disabled = true;
+  axis.renderer.labels.template.radius = 40;
+  axis.renderer.labels.template.adapter.add("text", function(text) {
+    return text + "%";
+  })
+  
+  /**
+   * Axis for ranges
+   */
+  
+  var colorSet = new am4core.ColorSet();
+  
+  var axis2 = chart.xAxes.push(new am4charts.ValueAxis());
+  axis2.min = 0;
+  axis2.max = 100;
+  axis2.renderer.innerRadius = 10
+  axis2.strictMinMax = true;
+  axis2.renderer.labels.template.disabled = true;
+  axis2.renderer.ticks.template.disabled = true;
+  axis2.renderer.grid.template.disabled = true;
+  
+  var range0 = axis2.axisRanges.create();
+  range0.value = 0;
+  range0.endValue = 50;
+  range0.axisFill.fillOpacity = 1;
+  range0.axisFill.fill = colorSet.getIndex(0);
+  
+  var range1 = axis2.axisRanges.create();
+  range1.value = 50;
+  range1.endValue = 100;
+  range1.axisFill.fillOpacity = 1;
+  range1.axisFill.fill = colorSet.getIndex(2);
+  
+  /**
+   * Label
+   */
+  
+  var label = chart.radarContainer.createChild(am4core.Label);
+  label.isMeasured = false;
+  label.fontSize = 45;
+  label.x = am4core.percent(50);
+  label.y = am4core.percent(100);
+  label.horizontalCenter = "middle";
+  label.verticalCenter = "bottom";
+  label.text = "50%";
+  
+  
+  /**
+   * Hand
+   */
+  
+  var hand = chart.hands.push(new am4charts.ClockHand());
+  hand.axis = axis2;
+  hand.innerRadius = am4core.percent(20);
+  hand.startWidth = 10;
+  hand.pin.disabled = true;
+  hand.value = 50;
+  
+  hand.events.on("propertychanged", function(ev) {
+    range0.endValue = ev.target.value;
+    range1.value = ev.target.value;
+    label.text = axis2.positionToValue(hand.currentPosition).toFixed(1);
+    axis2.invalidate();
+  });
+  
+  setInterval(function() {
+    //var value = Math.round(Math.random() * 100);
+    var value = document.getElementById("place_for_suggestions").textContent;
+    var animation = new am4core.Animation(hand, {
+      property: "value",
+      to: Number(value)
+    }, 1000, am4core.ease.cubicOut).start();
+  }, 2000);
+  
+  }); // end am4core.ready()
+  </script>
+<canvas data-type="linear-gauge"
+        data-width="160"
+        data-height="600"
+        data-border-radius="20"
+        data-borders="0"
+        data-bar-stroke-width="0"
+        data-minor-ticks="20"
+        data-animation-rule="cycle"
+        data-animation-duration="1000"
+        data-title="Temperature"
+        data-units="°C"
+        data-color-value-box-shadow="false"
+        data-animated-value="true"
+></canvas>
+
+
+<script>
+if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function(cb) {
+        var i = 0, s = this.length;
+        for (; i < s; i++) {
+            cb && cb(this[i], i, this);
+        }
+    }
+}
+
+var timers = [];
+
+function animateGauges() {
+    document.gauges.forEach(function(gauge) {
+        timers.push(setInterval(function() {
+            gauge.value = Number(document.getElementById("place_for_suggestions").textContent);
+
+        }, gauge.animation.duration + 500));
+    });
+}
+
+function stopGaugesAnimation() {
+    timers.forEach(function(timer) {
+        clearInterval(timer);
+    });
+}
+</script>
+
+<!-- Insert data without refresh-->
+ <input type="button" id="search_form_button"></input>
+
+  <div id="place_for_suggestions"></div>
+
+  <script src="static/jquery-3.4.1.js"></script>
+
+  <script>document.getElementById('search_form_button').style.display = 'none'</script>
+  
+  <script type='text/javascript'>
+    //Trigger your event every 3 seconds
+    setInterval(function () { document.getElementById('search_form_button').click(); }, 2000);
+  </script>
+  
+  <script>
+  $("#search_form_button").click(function(){
+      //var text = $(this).val();    
+      var text = "test";
+  
+      $.ajax({
+        url: "/suggestions",
+        type: "get",
+        data: {jsdata: text},
+        success: function(response) {
+          $('#place_for_suggestions').html(response);
+        },
+        error: function(xhr) {
+          //Do Something to handle error
+        }
+      });
+     
+  });
+  </script>
+
+    <!-- HTML -->
+    <div id="chartdiv"></div>
+<!-- Fin -->
+</body>
+</html>
