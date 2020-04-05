@@ -22,11 +22,11 @@ else:
 
 app = Flask(__name__)
 
-try:
-    r = redis.Redis(host="localhost",port=6379)
-    r.ping()
-except redis.ConnectionError:
-    exit('Failed to connect to Redis, terminating.')                       
+#try:
+#    r = redis.Redis(host="localhost",port=6379)
+#    r.ping()
+#except redis.ConnectionError:
+#    exit('Failed to connect to Redis, terminating.')                       
 
 @app.route('/')
 def index():
@@ -44,9 +44,9 @@ def suggestions():
 
     if humidity is None or temperature is None:
         print("humidity or temperature is None")
-        text = r.get("humidity")
-    r.set("humidity",humidity)
-    return render_template('suggestions.html', suggestions=humidity)
+        text = int(text)
+    text = int(humidity)
+    return render_template('suggestions.html', suggestions=text)
 
 if __name__ == '__main__':
     app.run(debug=True)
