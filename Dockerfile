@@ -1,3 +1,6 @@
+#pi@rpi-00:~ $ docker build -t mon_dht .
+#pi@rpi-00:~ $ docker run -p 192.168.0.100:8000:8000 --privileged mon_dht 11 17 
+
 # BUILD IMAGE
 FROM arm32v6/python:2.7-alpine3.7 as builder
 
